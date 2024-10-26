@@ -1,20 +1,60 @@
-{
-    "name": "ws_task",
-    "version": "1.0.0",
-    "description": "Template for the WebSocket remote control task",
-    "main": "index.js",
-    "type": "module",
-    "scripts": {
-        "start": "node ./index.js",
-        "start:dev": "nodemon ./index.js",
-        "test": "echo \"Error: no test specified\" && exit 1"
-    },
-    "author": "Andrei Auchynnikau",
-    "keywords": [],
-    "license": "ISC",
-    "devDependencies": {
-        "nodemon": "^2.0.16"
-    },
+
+{  "name": "file-manager",
+"version": "1.0.0",
+"description": "Task https://github.com/AlreadyBored/nodejs-assignments/blob/main/assignments/crud-api/assignment.md",
+"engines": {
+  "node": ">=22.9.0"
+},
+"scripts": {
+  "build": "webpack --config ./webpack.config.js --env PORT=3000",
+  "run": "node ./dist/bundle.js",
+  "start:original": "node ./index.js",
+  "start:originalDev": "nodemon ./index.js",
+  "start:dev": "ts-node-dev ./src/index.ts",
+  "start:prod": "npm run build && npm run run",
+  "start:multi": "ts-node-dev ./src/cluster.ts",
+  "test": "jest --silent",
+  "lint": "eslint . --ignore-pattern .config/*",
+  "lint:fix": "eslint . --fix",
+  "pretier:check": "prettier . --check",
+  "pretier:fix": "prettier . --write",
+  "lp:check": "npm run lint && npm run pretier:check",
+  "lp:fix": "npm run lint:fix && npm run pretier:fix"
+},
+"repository": {
+  "type": "git",
+  "url": "git+https://github.com/palasja/RSS_Node_FileManager"
+},
+"keywords": [
+  "nodejs",
+  "CRUD API",
+  "palasja"
+],
+"author": "palasja & Andrei Auchynnikau",
+"license": "ISC",
+"devDependencies": {
+  "@eslint/js": "^9.13.0",
+  "@types/jest": "^29.5.13",
+  "@types/node": "^22.7.6",
+  "@types/uuid": "^10.0.0",
+  "@typescript-eslint/parser": "^8.9.0",
+  "cross-env": "^7.0.3",
+  "dotenv": "^16.4.5",
+  "eslint": "^9.13.0",
+  "eslint-config-typescript": "^3.0.0",
+  "jest": "^29.7.0",
+  "node-mocks-http": "^1.16.1",
+  "prettier": "3.3.3",
+  "ts-jest": "^29.2.5",
+  "ts-loader": "^9.5.1",
+  "ts-node": "^10.9.2",
+  "ts-node-dev": "^2.0.0",
+  "typescript": "^5.6.3",
+  "typescript-eslint": "^8.10.0",
+  "webpack": "^5.95.0",
+  "webpack-node-externals": "^3.0.0",
+  "webpack-cli": "^5.1.4"
+},
     "dependencies": {
         "ws": "^8.8.0"
     }

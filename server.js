@@ -1,6 +1,7 @@
 import { WebSocketServer } from 'ws';
+import 'dotenv/config';
 
-const wss = new WebSocketServer({ port: 3000 });
+const wss = new WebSocketServer({ port:process.env.port });
 
 wss.on('connection', function connection(ws) {
   ws.on('error', console.error);

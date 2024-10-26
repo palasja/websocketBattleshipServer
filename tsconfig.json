@@ -1,0 +1,14 @@
+{
+  "compilerOptions": {
+    "target": "ESNext", // Compile to a modern ECMAScript version that supports ES modules
+    // "module": "ES2015", // Use ES module syntax for module code generation
+    "moduleResolution": "node", // Use Node.js style module resolution
+    "esModuleInterop": true, // Enables default imports from modules with no default export
+    "outDir": "./dist", // Output directory for compiled files
+    "noImplicitAny": true,
+    "strict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noFallthroughCasesInSwitch": true
+  }
+}
