@@ -1,13 +1,14 @@
 import { WebSocketServer, WebSocket,  } from 'ws';
-import { AddUserToRoomReq, AddUserToRoomRes, Message, Player, RegReq, RegRes, Room,  RoomUser,  Ship,  Winner } from './types/messages';
-import crypto from "node:crypto";
+import { AddShipReq, AddUserToRoomReq, AddUserToRoomRes, Message, Player, PlayerTurnRes, RegReq, RegRes, Room,  RoomUser,  Ship,  StartGameRes,  Winner } from './types/messages';
+import  { randomInt, randomUUID,  } from "node:crypto";
 
-const getRandom = () => crypto.randomBytes(16).toString('hex');
+const getRandom = () => randomUUID().toString();
 
 const sockets: {playerId: string, ws:WebSocket}[] = [];
 let players: Player[] = [];
 let availableRooms: Room[] = [];
 const winners: Winner[] = [];
+const games: GameInfo[] = [];
 
 type PlayerGameInfo = {
     sessionId: string,
@@ -18,8 +19,8 @@ type PlayerGameInfo = {
 
 type GameInfo = {
     idGame: string,
-    firstPlayer: PlayerGameInfo
-    secondPlayer:PlayerGameInfo
+    players: PlayerGameInfo[],
+    actvePlayerId: number
 }
 
 const sendMessageStr = (type: string, data: object, ws?: WebSocket) => {
@@ -66,41 +67,60 @@ const createRoom = (playerId: string) => {
   availableRooms.push(newRoom);
 }
 
-// const updateWinners = (winnerName: string) => {
-//   const winnerIndex = winners.findIndex( w => w.name == winnerName);
-//   winnerIndex == -1 ? winners.push({name: winnerName, wins: 0}) : winners[winnerIndex].wins++;
-// }
-const sendToRoomPlayer = (game: GameInfo, type: string, data?: []) => {
-  if(data) {
-    sendMessageStr(type, data, game.firstPlayer.ws);
-    sendMessageStr(type, data, game.secondPlayer.ws);
-  } else {
-    const fpData: AddUserToRoomRes = {
-      idGame: game.idGame,
-      idPlayer: game.firstPlayer.sessionId
-    }
-    const spData: AddUserToRoomRes = {
-      idGame: game.idGame,
-      idPlayer: game.secondPlayer.sessionId
-    }
-    sendMessageStr(type, fpData, game.firstPlayer.ws);
-    sendMessageStr(type, spData, game.secondPlayer.ws);
+const sendToRoomPlayer = (game: GameInfo, type: string, typeInfo:string) => {
+  switch (typeInfo) {
+    case 'ships':
+      game.players.forEach(p => {
+        const data: StartGameRes = {
+          ships: p.ships as Ship[],
+          currentPlayerIndex: p.sessionId
+        }
+        sendMessageStr(type, data, p.ws);
+      });
+      break;
+    case 'ready':
+      game.players.forEach(p => {
+        const data: AddUserToRoomRes = {
+          idGame: game.idGame,
+          idPlayer: p.sessionId
+        }
+        sendMessageStr(type, data, p.ws);
+      });
+      break;
+    case 'turn':
+        game.players.forEach(p => {
+          const data: PlayerTurnRes = {
+            currentPlayer: game.players[game.actvePlayerId].sessionId
+          }
+          sendMessageStr(type, data, p.ws);
+        });
+        break;
+    default:
+      
+      break;
   }
-    
 }
 
-const getFielgs = ():[][] => {
+const getFields = ():[][] => {
   const rows = 10;
   const columns = 10;
   return Array(rows).fill(Array(columns).fill('shot'))
 
 }
+
+const getGameUser = (socket: WebSocket) => {
+  return {
+    sessionId: getRandom(),
+    ws: socket,
+    field: getFields()
+  }
+}
+
 const startWebSocketServer = (runPort: number) => {
   const wss = new WebSocketServer({ port: runPort });
   console.log(`Start websocket server on the ${runPort} port!`);
   
   wss.on('connection', function connection(ws) {
-    let game: GameInfo;
     const playerId = getRandom();
     sockets.push({playerId, ws});
     console.log(playerId);
@@ -126,22 +146,31 @@ const startWebSocketServer = (runPort: number) => {
         case 'add_user_to_room': {
           const room: AddUserToRoomReq = JSON.parse(messageReq.data as string);
           const activeRoom = availableRooms.find( r => r.roomId == room.indexRoom) as Room;
-          game = {
+          const player1Socket = sockets.find(s => s.playerId == activeRoom.roomUsers[0].index)?.ws  as WebSocket;
+          const player1 = getGameUser(player1Socket);
+          const player2Socket = sockets.find(s => s.playerId == playerId)?.ws  as WebSocket;
+          const player2 = getGameUser(player2Socket);
+          const game = {
             idGame: getRandom(),
-            firstPlayer: {
-              sessionId: getRandom(),
-              ws: sockets.find(s => s.playerId == activeRoom.roomUsers[0].index)?.ws  as WebSocket,
-              field: getFielgs()
-            },
-            secondPlayer:{
-              sessionId: getRandom(),
-              ws:  sockets.find(s => s.playerId == playerId)?.ws  as WebSocket,
-              field: getFielgs()
-            }
-          }
+            players: [player1, player2],
+            actvePlayerId: randomInt(0, 1)
+          };
+          games.push(game);
           availableRooms = availableRooms.filter(r => r.roomId != room.indexRoom);
           sendMessageStr('update_room', availableRooms);
-          sendToRoomPlayer(game, "create_game");
+          sendToRoomPlayer(game, "create_game", "ready");
+          break;
+        };
+        case 'add_ships': {
+          createRoom(playerId);
+          const shipsInfo: AddShipReq = JSON.parse(messageReq.data as string);
+          const curGame = games.find(g => g.idGame == shipsInfo.gameId);
+          const curPlayerInfo = curGame?.players.find( p => p.sessionId == shipsInfo.indexPlayer) as PlayerGameInfo;
+          curPlayerInfo.ships = shipsInfo.ships;
+          if(curGame?.players.some( p => p.ships)){
+            sendToRoomPlayer(curGame, "start_game", "ships");
+            sendToRoomPlayer(curGame, "turn", "turn");
+          }
           break;
         };
       }
