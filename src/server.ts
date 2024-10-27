@@ -106,18 +106,29 @@ const sendMessageStr = (type: string, data: object, ws?: WebSocket) => {
 
 
 const newPlayer = (data: RegReq, id: string): RegRes => {
-  const newPlayer:Player = {
-    id: id,
-    name: data.name,
-    password: data.password
+  let res: RegRes;
+  if(!players.find(p => p.name == data.name)){
+    const newPlayer:Player = {
+      id: id,
+      name: data.name,
+      password: data.password
+    }
+    res = {
+      name: newPlayer.name,
+      index: newPlayer.id,
+      error: false,
+      errorText: '',
+    };
+    players.push(newPlayer);
+  } else {
+     res = {
+      name: newPlayer.name,
+      index: '',
+      error: true,
+      errorText: `Player with name ${data.name} already exist`,
+    };
   }
-  players.push(newPlayer);
-  const res: RegRes = {
-    name: newPlayer.name,
-    index: newPlayer.id,
-    error: false,
-    errorText: '',
-  };
+  
   return res;
 }
 
