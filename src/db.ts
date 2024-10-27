@@ -1,8 +1,8 @@
 import { Player, Room, Winner } from "./types/messages";
-import { GameInfo } from "./types/webServerTypes";
-import {  WebSocket,  } from 'ws';
+import { GameInfo, SocketInfo } from "./types/webServerTypes";
 
-let sockets: {playerId: string, ws:WebSocket}[] = [];
+
+let sockets: SocketInfo[] = [];
 let players: Player[] = [];
 let availableRooms: Room[] = [];
 let winners: Winner[] = [];

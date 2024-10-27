@@ -2,22 +2,30 @@
 import { WebSocketServer } from 'ws';
 import { AddShipReq, AddUserToRoomReq,  AttackReq,   Message,   Position, RegReq, Room } from './types/messages';
 import  { randomInt, randomUUID,  } from "node:crypto";
-import { GameInfo, PlayerGameInfo } from './types/webServerTypes';
-import { sockets, availableRooms, winners, games } from './db';
+import { GameInfo, PlayerGameInfo, SocketInfo } from './types/webServerTypes';
+import { sockets, availableRooms, winners, games, players } from './db';
 import { sendToRoomPlayer, sendMessageStr } from './senders';
 import { getPlayerCellField } from './cellGetter';
 import { atack } from './gameAction';
 import { newPlayer, createRoom, getGamePlayers } from './romActioon';
+import { removeRoomByPlayerId, removePlayer, removeSocketInfo, removeRoom } from './helper';
 
 const startWebSocketServer = (runPort: number) => {
   const wss = new WebSocketServer({ port: runPort });
   console.log(`Start websocket server on the ${runPort} port!`);
   
-  wss.on('connection', function connection(ws) {
-    const playerId = randomUUID();
-    sockets.push({playerId, ws});
+  wss.on('connection', (ws) => {
+    const playerId = randomUUID().toString();
+    const socketInfo: SocketInfo = {playerId, ws};
+    sockets.push(socketInfo);
     ws.on('error', console.error);
-  
+    ws.on('close', (code:number) => {
+      const playerName = players.find(p => p.id == playerId)?.name;
+      removeRoomByPlayerId(playerId);
+      removePlayer(playerId);
+      removeSocketInfo(playerId);
+      console.log(`Socket ${playerName ? playerName : 'someUser'} is closed with code ${code}. `)
+    })
     ws.on('message', function message(mes) {
       const messageReq: Message = JSON.parse(mes.toString());
       console.log(messageReq);
@@ -50,8 +58,7 @@ const startWebSocketServer = (runPort: number) => {
             actvePlayerSessionId: gamePlayers[randomInt(0,1)].sessionId
           };
           games.push(game);
-          const index = availableRooms.findIndex(r => r.roomId == room.indexRoom);
-          availableRooms.splice(index, 1);
+          removeRoom(room.indexRoom);
           sendMessageStr('update_room', availableRooms);
           sendToRoomPlayer(game, "create_game");
           break;

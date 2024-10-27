@@ -1,6 +1,10 @@
 import { Position, Ship } from "./messages"
 import { WebSocket,  } from 'ws';
 
+type SocketInfo = {
+  playerId: string, 
+  ws:WebSocket
+};
 type PlayerField = CellInfo[][]
 type PlayerGameInfo = {
     name: string,
@@ -32,5 +36,6 @@ export {
   CellInfo,
   GameInfo,
   AtackResultStatus,
-  AtackResult
+  AtackResult,
+  SocketInfo
 }
