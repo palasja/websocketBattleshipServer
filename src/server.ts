@@ -21,7 +21,8 @@ type PlayerGameInfo = {
     countBrokenShip: number
 }
 type CellInfo = {
-  cell: boolean[]
+  cell: boolean[],
+  ship: Ship
 }
 
 type GameInfo = {
@@ -39,7 +40,8 @@ const getPlayerField = (ships: Ship[]):PlayerField => {
   const field:PlayerField = Array(10).fill(0).map(() => Array(10).fill(undefined))
   ships.forEach( s => {
     const gameShip:CellInfo = {
-      cell: new Array(s.length).fill(true)
+      cell: new Array(s.length).fill(true),
+      ship: s,
     };
 
     for (let shipCellIndex = 0; shipCellIndex < s.length; shipCellIndex++) {
@@ -51,6 +53,38 @@ const getPlayerField = (ships: Ship[]):PlayerField => {
     }
   })
   return field;
+}
+
+const getCellKilled = (ship: Ship):Position[] => {
+  const cell: Position[] = [];
+  for (let i = 0; i < ship.length; i++) {
+    const pos: Position = ship.direction ? {x: ship.position.x, y:ship.position.y + i} : {x: ship.position.x + i, y:ship.position.y};    
+    cell.push(pos);
+  }
+  return cell;
+}
+
+const getCellAround = (ship: Ship):Position[] => {
+  const cell: Position[] = [];
+  if(ship.direction){
+    cell.push({x: ship.position.x, y: ship.position.y - 1});
+    cell.push({x: ship.position.x, y: ship.position.y + ship.length});
+    for(let i = -1; i < ship.length + 1; i++){
+      cell.push({x: ship.position.x - 1, y: ship.position.y  + i});
+      cell.push({x: ship.position.x + 1, y: ship.position.y  + i});
+    }
+  } else {
+    cell.push({x: ship.position.x - 1, y: ship.position.y});
+    cell.push({x: ship.position.x + ship.length, y: ship.position.y});
+    for(let i = -1 ; i < ship.length + 1; i++){
+      cell.push({x: ship.position.x + i, y: ship.position.y + 1});
+      cell.push({x: ship.position.x + i, y: ship.position.y - 1});
+    }
+  }
+
+  const existsCell = cell.filter(c => c.x >= 0 && c.x < 10 && c.y >= 0 && c.y < 10)
+  return existsCell;
+
 }
 
 const sendMessageStr = (type: string, data: object, ws?: WebSocket) => {
@@ -232,17 +266,25 @@ const startWebSocketServer = (runPort: number) => {
             if(cellNotShotIndex != -1) cellContent.cell[cellNotShotIndex] = false;
             status = cellContent.cell.every(c => c == false) ?  "killed" : "shot";
             if(status == "killed") {
+              const celsAround = getCellAround(cellContent.ship);
+              sendToRoomPlayer(curGame, "attack", "attack", {position: {x: atackReq.x, y: atackReq.y}, status: status});
+              celsAround.forEach( c => sendToRoomPlayer(curGame, "attack", "attack", {position: c, status: "miss"}));
+              const celsKilled = getCellKilled(cellContent.ship);
+              celsKilled.forEach( c => sendToRoomPlayer(curGame, "attack", "attack", {position: c, status: "killed"}));
               enemy.countBrokenShip++;
-              if(enemy.countBrokenShip == enemy.ships?.length) sendToRoomPlayer(curGame, "finish", "finish");
-              const playerName = (curGame.players.find(p => p.sessionId == atackReq.indexPlayer) as PlayerGameInfo);
-              const winner = winners.find(w => w.name == playerName.name);
-              if(winner == undefined){
-                winners.push({name: playerName.name, wins: 1})
-              } else {
-                winner.wins += 1;
-              }
-              console.log(winner);
-              sendMessageStr('update_winners', winners);
+              const isFinished = enemy.countBrokenShip == enemy.ships?.length;
+              if(isFinished){
+                sendToRoomPlayer(curGame, "finish", "finish");
+                const playerName = (curGame.players.find(p => p.sessionId == atackReq.indexPlayer) as PlayerGameInfo);
+                const winner = winners.find(w => w.name == playerName.name);
+                if(winner == undefined){
+                  winners.push({name: playerName.name, wins: 1})
+                } else {
+                  winner.wins += 1;
+                }
+                sendMessageStr('update_winners', winners);
+              } 
+              break;
             }
             sendToRoomPlayer(curGame, "attack", "attack", {position: {x: atackReq.x, y: atackReq.y}, status: status})
           } else {
