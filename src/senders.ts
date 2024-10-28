@@ -1,3 +1,4 @@
+import { OUTPUT_ALL_MARK, OUTPUT_MARK } from "./constants";
 import { sockets } from "./db";
 import { StartGameRes, Ship, AddUserToRoomRes, PlayerTurnRes, AttackRes, FinishGameRes } from "./types/messages";
 import { GameInfo, AtackResult } from "./types/webServerTypes";
@@ -11,10 +12,13 @@ const sendMessageStr = (type: string, data: object, ws?: WebSocket) => {
     id: 0,
   }
   const messageReg = JSON.stringify(message);
-
-  if(ws == undefined){
+    if(ws == undefined){
+    console.log(OUTPUT_ALL_MARK);
+    console.log(messageReg);
     sockets.forEach(el => el.ws.send(messageReg));
   } else {
+    console.log(OUTPUT_MARK);
+    console.log(messageReg);
     ws.send(messageReg);
   }
 }

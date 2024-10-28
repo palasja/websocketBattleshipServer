@@ -45,7 +45,14 @@ const sipsForBot:{
 ]
 
 const BOT_NAME = 'Mr Bot';
+const INPUT_MARK = '<<<<<<<      IN     <<<<<<<<<';
+const OUTPUT_MARK ='>>>>>>>     OUT     >>>>>>>>';
+const OUTPUT_ALL_MARK ='>>>>>>>>    ALL    >>>>>>>>';
 export {
   sipsForBot,
-  BOT_NAME
+  BOT_NAME,
+  OUTPUT_MARK,
+  INPUT_MARK,
+  OUTPUT_ALL_MARK
+  
 }

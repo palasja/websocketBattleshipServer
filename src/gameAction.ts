@@ -3,15 +3,15 @@ import { getCellAround, getPlayerCellField, getShipCels } from "./cellGetter";
 import { games, players, sockets, winners } from "./db";
 import { sendToRoomPlayer, sendMessageStr } from "./senders";
 import { Position, Ship } from "./types/messages";
-import { GameInfo, PlayerGameInfo, PlayerField, AtackResultStatus } from "./types/webServerTypes";
-import { BOT_NAME, sipsForBot } from "./constants";
+import { GameInfo, PlayerGameInfo, PlayerField, AtackResultStatus, ResponseType } from "./types/webServerTypes";
+import { BOT_NAME, sipsForBot,  } from "./constants";
 
 const switchActivePlayer = (game:GameInfo) => {
   game.actvePlayerSessionId = (game.players.find(p => p.sessionId != game.actvePlayerSessionId) as PlayerGameInfo).sessionId
 }
 
 const finishGame = (curGame: GameInfo, playerSessionId: string | number) => {
-  sendToRoomPlayer(curGame, "finish");
+  sendToRoomPlayer(curGame, ResponseType.FINISH);
   const playerName = (curGame.players.find(p => p.sessionId == playerSessionId) as PlayerGameInfo);
   const winner = winners.find(w => w.name == playerName.name);
   if( ! curGame.players.find(p => isBot(p.sessionId))){
@@ -43,21 +43,21 @@ const atack = (curGame: GameInfo, atackPosition: Position) => {
   const enemyField = enemy.playerField as PlayerField;
   const cellContent = enemyField[atackPosition.x][atackPosition.y];
   if(cellContent === null) return;
-  let status:AtackResultStatus = "miss";
+  let status = AtackResultStatus.MISS;
   if(cellContent !== undefined){
     const cellNotShotIndex = cellContent.shipCellCounter.findIndex(c => c == true);
     if(cellNotShotIndex != -1) cellContent.shipCellCounter[cellNotShotIndex] = false;
-    status = cellContent.shipCellCounter.every(c => c == false) ?  "killed" : "shot";
-    if(status == "killed") {
+    status = cellContent.shipCellCounter.every(c => c == false) ?  AtackResultStatus.KILLED : AtackResultStatus.SHOT;
+    if(status == AtackResultStatus.KILLED) {
       const celsAround = getCellAround(cellContent.ship);
-      sendToRoomPlayer(curGame, "attack", {position: {x: atackPosition.x, y: atackPosition.y}, status: status});
+      sendToRoomPlayer(curGame, ResponseType.ATACK, {position: {x: atackPosition.x, y: atackPosition.y}, status: status});
       celsAround.forEach( c => {
-        sendToRoomPlayer(curGame, "attack", {position: c, status: "miss"});
+        sendToRoomPlayer(curGame, ResponseType.ATACK, {position: c, status: AtackResultStatus.MISS});
         enemyField[c.x][c.y] = null;
       });
       const celsKilled = getShipCels(cellContent.ship);
       celsKilled.forEach( c => {
-        sendToRoomPlayer(curGame, "attack", {position: c, status: "killed"});
+        sendToRoomPlayer(curGame, ResponseType.ATACK, {position: c, status: AtackResultStatus.KILLED});
         enemyField[c.x][c.y] = null;
       });
       enemy.countBrokenShip++;
@@ -66,15 +66,14 @@ const atack = (curGame: GameInfo, atackPosition: Position) => {
         finishGame(curGame, curGame.actvePlayerSessionId)
         return;
       };
-      
     }
-    sendToRoomPlayer(curGame, "attack", {position: {x: atackPosition.x, y: atackPosition.y}, status: status})
+    sendToRoomPlayer(curGame, ResponseType.ATACK, {position: {x: atackPosition.x, y: atackPosition.y}, status: status})
   } else {
-    sendToRoomPlayer(curGame, "attack", {position: {x: atackPosition.x, y: atackPosition.y}, status: status})
+    sendToRoomPlayer(curGame, ResponseType.ATACK, {position: {x: atackPosition.x, y: atackPosition.y}, status: status})
     switchActivePlayer(curGame);
   }
   enemyField[atackPosition.x][atackPosition.y] = null;
-  sendToRoomPlayer(curGame, "turn");
+  sendToRoomPlayer(curGame, ResponseType.TURN);
   if(isBot(curGame.actvePlayerSessionId)) setTimeout(() => randomAtack(curGame), 700);
 }
 
@@ -106,7 +105,7 @@ const createGameWithBot = (playerId: string) => {
     actvePlayerSessionId: gamePlayers[randomInt(0,2)].sessionId
   };
   games.push(game);
-  sendToRoomPlayer(game, "create_game");
+  sendToRoomPlayer(game, ResponseType.CREATE_GAME);
 }
 
 const getBotSips = ():Ship[] => {

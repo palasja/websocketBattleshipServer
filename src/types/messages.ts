@@ -8,7 +8,6 @@ type Player = {
 type Message = {
   id: number,
   type: string,
-  //type: "reg" | "create_game" | "start_game" | "turn" | "attack" | "finish" | "update_room" | "update_winners" ,
   data:  BattleshipRequests | BattleshipResponces
 }
 
