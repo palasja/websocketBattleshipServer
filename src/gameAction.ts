@@ -10,7 +10,7 @@ import {
   AtackResultStatus,
   ResponseType,
 } from './types/webServerTypes';
-import { BOT_NAME, sipsForBot } from './constants';
+import { BOT_DELAY, BOT_NAME, sipsForBot } from './constants';
 
 const switchActivePlayer = (game: GameInfo) => {
   game.actvePlayerSessionId = (
@@ -103,7 +103,7 @@ const atack = (curGame: GameInfo, atackPosition: Position) => {
   }
   enemyField[atackPosition.x][atackPosition.y] = null;
   sendToRoomPlayer(curGame, ResponseType.TURN);
-  if (isBot(curGame.actvePlayerSessionId)) setTimeout(() => randomAtack(curGame), 700);
+  if (isBot(curGame.actvePlayerSessionId)) setTimeout(() => randomAtack(curGame), BOT_DELAY);
 };
 
 const isBot = (sessionId: string | number) => {
