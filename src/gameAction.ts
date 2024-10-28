@@ -140,7 +140,7 @@ const getBotSips = ():Ship[] => {
     getShipCels(ship).forEach(p => field[p.x][p.y] = null);
     return ship;
   })
-  console.log(botShips); // For check bot play
+  //console.log(botShips); // For check bot play
   return botShips;
 }
 
