@@ -1,12 +1,12 @@
 
 import { WebSocketServer } from 'ws';
-import { AddShipReq, AddUserToRoomReq,  AttackReq,   Message,   Position, RandomAttackReq, RegReq, Room } from './types/messages';
+import { AddShipReq, AddUserToRoomReq,  AttackReq,   Message, Position, RandomAttackReq, RegReq, Room } from './types/messages';
 import  { randomInt, randomUUID,  } from "node:crypto";
 import { GameInfo, PlayerGameInfo, SocketInfo } from './types/webServerTypes';
 import { sockets, availableRooms, winners, games, players } from './db';
 import { sendToRoomPlayer, sendMessageStr } from './senders';
 import { getPlayerCellField } from './cellGetter';
-import { atack, randomAtack } from './gameAction';
+import { atack, createGameWithBot, isBot, randomAtack } from './gameAction';
 import { newPlayer, createRoom, getGamePlayers } from './romActioon';
 import { removeRoomByPlayerId, removePlayer, removeSocketInfo, removeRoom } from './helper';
 
@@ -46,8 +46,18 @@ const startWebSocketServer = (runPort: number) => {
           break;
         };
         case 'create_room': {
+          if(availableRooms.find(r => r.roomUsers.find(p =>p.index == playerId))) break;
           createRoom(playerId);
           sendMessageStr('update_room',  availableRooms);
+          break;
+        };
+        case 'single_play': {
+          const playerRoom = availableRooms.find(r => r.roomUsers.find(p =>p.index == playerId));
+          if(playerRoom) {
+            removeRoom(playerRoom.roomId);
+            sendMessageStr('update_room', availableRooms);
+          }
+          createGameWithBot(playerId);
           break;
         };
         case 'add_user_to_room': {
@@ -58,7 +68,7 @@ const startWebSocketServer = (runPort: number) => {
           const game:GameInfo  = {
             idGame: randomUUID(),
             players: gamePlayers,
-            actvePlayerSessionId: gamePlayers[randomInt(0,1)].sessionId
+            actvePlayerSessionId: gamePlayers[randomInt(0,2)].sessionId
           };
           games.push(game);
           removeRoom(room.indexRoom);
@@ -75,6 +85,7 @@ const startWebSocketServer = (runPort: number) => {
           if(curGame?.players.every( p => p.ships)){
             sendToRoomPlayer(curGame, "start_game");
             sendToRoomPlayer(curGame, "turn");
+            if(isBot(curGame.actvePlayerSessionId)) randomAtack(curGame);
           }
           break;
         };

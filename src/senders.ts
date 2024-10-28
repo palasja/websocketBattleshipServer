@@ -23,51 +23,63 @@ const sendToRoomPlayer = (game: GameInfo, type: string, atackInfo?: AtackResult)
   switch (type) {
     case 'start_game':
       game.players.forEach(p => {
-        const data: StartGameRes = {
-          ships: p.ships as Ship[],
-          currentPlayerIndex: p.sessionId
+        if(p.ws !== undefined){
+          const data: StartGameRes = {
+            ships: p.ships as Ship[],
+            currentPlayerIndex: p.sessionId
+          }
+          sendMessageStr(type, data, p.ws);
         }
-        sendMessageStr(type, data, p.ws);
       });
       break;
     case 'create_game':
       game.players.forEach(p => {
-        const data: AddUserToRoomRes = {
-          idGame: game.idGame,
-          idPlayer: p.sessionId
+        if(p.ws !== undefined){
+          const data: AddUserToRoomRes = {
+            idGame: game.idGame,
+            idPlayer: p.sessionId
+          }
+          sendMessageStr(type, data, p.ws);
         }
-        sendMessageStr(type, data, p.ws);
+        
       });
       break;
     case 'turn':
+      
         game.players.forEach(p => {
-          const data: PlayerTurnRes = {
-            currentPlayer: game.actvePlayerSessionId
+          if(p.ws !== undefined){
+            const data: PlayerTurnRes = {
+              currentPlayer: game.actvePlayerSessionId
+            }
+            sendMessageStr(type, data, p.ws);
           }
-          sendMessageStr(type, data, p.ws);
+          
         });
         break;
     case 'attack':
+      
       game.players.forEach(p => {
-         const data: AttackRes = {
+        if(p.ws !== undefined){         const data: AttackRes = {
           ...atackInfo as AtackResult,
           currentPlayer: game.actvePlayerSessionId,
         }
-        sendMessageStr(type, data, p.ws);
+        sendMessageStr(type, data, p.ws);}
+
       });
       break;
     case 'finish':
       game.players.forEach(p => {
-        const data: FinishGameRes = {
-          winPlayer: game.actvePlayerSessionId
+        if(p.ws !== undefined){
+          const data: FinishGameRes = {
+            winPlayer: game.actvePlayerSessionId
+          }
+          sendMessageStr(type, data, p.ws);
         }
-        sendMessageStr(type, data, p.ws);
       });
       break;
     default:
       break;
   }
 }
-
 
 export {sendMessageStr, sendToRoomPlayer}

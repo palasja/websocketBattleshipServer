@@ -2,7 +2,7 @@ import { Position, Ship } from "./types/messages";
 import { PlayerField, CellInfo } from "./types/webServerTypes";
 
 const getPlayerCellField = (ships: Ship[]):PlayerField => {
-  const field:PlayerField = Array(10).fill(0).map(() => Array(10).fill(undefined))
+  const field:PlayerField = Array(10).fill(0).map(() => Array(10).fill(undefined));
   ships.forEach( s => {
     const gameShip:CellInfo = {
       shipCellCounter: new Array(s.length).fill(true),
@@ -20,13 +20,13 @@ const getPlayerCellField = (ships: Ship[]):PlayerField => {
   return field;
 }
 
-const getCellKilled = (ship: Ship):Position[] => {
+const getShipCels = (ship: Ship):Position[] => {
   const cell: Position[] = [];
   for (let i = 0; i < ship.length; i++) {
     const pos: Position = ship.direction ? {x: ship.position.x, y:ship.position.y + i} : {x: ship.position.x + i, y:ship.position.y};    
     cell.push(pos);
   }
-  
+
   return cell;
 }
 
@@ -54,6 +54,6 @@ const getCellAround = (ship: Ship):Position[] => {
 
 export {
   getPlayerCellField,
-  getCellKilled,
+  getShipCels,
   getCellAround
 }

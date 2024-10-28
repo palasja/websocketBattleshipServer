@@ -9,7 +9,7 @@ type PlayerField = CellInfo[][] | null[][]
 type PlayerGameInfo = {
     name: string,
     sessionId: string,
-    ws: WebSocket,
+    ws: WebSocket | undefined,
     playerField?: PlayerField,
     ships?: Ship[],
     countBrokenShip: number
