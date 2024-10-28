@@ -1,0 +1,49 @@
+{
+  "name": "file-manager",
+  "version": "1.0.0",
+  "description": "Task https://github.com/AlreadyBored/nodejs-assignments/blob/main/assignments/crud-api/assignment.md",
+  "engines": {
+    "node": ">=22.9.0"
+  },
+  "scripts": {
+    "start": "ts-node-dev ./src/index.ts",
+    "test": "jest --silent",
+    "lint": "eslint . --ignore-pattern .config/*",
+    "lint:fix": "eslint . --fix",
+    "pretier:check": "prettier . --check",
+    "pretier:fix": "prettier . --write",
+    "lp:check": "npm run lint && npm run pretier:check",
+    "lp:fix": "npm run lint:fix && npm run pretier:fix"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/palasja/RSS_Node_FileManager"
+  },
+  "keywords": [
+    "nodejs",
+    "CRUD API",
+    "palasja"
+  ],
+  "author": "palasja & Andrei Auchynnikau",
+  "license": "ISC",
+  "devDependencies": {
+    "@eslint/js": "^9.13.0",
+    "@types/node": "^22.7.6",
+    "@types/uuid": "^10.0.0",
+    "@types/ws": "8.5.12",
+    "@typescript-eslint/parser": "^8.9.0",
+    "cross-env": "^7.0.3",
+    "dotenv": "^16.4.5",
+    "eslint": "^9.13.0",
+    "eslint-config-typescript": "^3.0.0",
+    "prettier": "3.3.3",
+    "ts-loader": "^9.5.1",
+    "ts-node": "^10.9.2",
+    "ts-node-dev": "^2.0.0",
+    "typescript": "^5.6.3",
+    "typescript-eslint": "^8.10.0"
+  },
+  "dependencies": {
+    "ws": "^8.8.0"
+  }
+}
