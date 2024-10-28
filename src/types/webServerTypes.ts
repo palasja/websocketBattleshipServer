@@ -1,37 +1,37 @@
-import { Position, Ship } from "./messages"
-import { WebSocket,  } from 'ws';
+import { Position, Ship } from './messages';
+import { WebSocket } from 'ws';
 
 type SocketInfo = {
-  playerId: string, 
-  ws:WebSocket
+  playerId: string;
+  ws: WebSocket;
 };
-type PlayerField = CellInfo[][] | null[][] 
+type PlayerField = CellInfo[][] | null[][];
 type PlayerGameInfo = {
-    name: string,
-    sessionId: string,
-    ws: WebSocket | undefined,
-    playerField?: PlayerField,
-    ships?: Ship[],
-    countBrokenShip: number
-}
+  name: string;
+  sessionId: string;
+  ws: WebSocket | undefined;
+  playerField?: PlayerField;
+  ships?: Ship[];
+  countBrokenShip: number;
+};
 type CellInfo = {
-  shipCellCounter: boolean[],
-  ship: Ship
-}
+  shipCellCounter: boolean[];
+  ship: Ship;
+};
 
 type GameInfo = {
-    idGame: string,
-    players: PlayerGameInfo[],
-    actvePlayerSessionId: string
-}
+  idGame: string;
+  players: PlayerGameInfo[];
+  actvePlayerSessionId: string;
+};
 
 enum AtackResultStatus {
-  MISS = "miss",
-  KILLED = "killed",
-  SHOT = "shot"
+  MISS = 'miss',
+  KILLED = 'killed',
+  SHOT = 'shot',
 }
 
-enum RequestType{
+enum RequestType {
   REG = 'reg',
   RANDOM_ATACK = 'randomAttack',
   CREATE_ROOM = 'create_room',
@@ -41,21 +41,21 @@ enum RequestType{
   ATTACK = 'attack',
 }
 
-enum ResponseType{
-   ATACK = "attack",
-   REG = 'reg',
-   UPDATE_ROOM = 'update_room',
-   UPDATE_WINNERS = 'update_winners',
-   CREATE_GAME = "create_game",
-   START_GAME = "start_game",
-   TURN = "turn",
-   FINISH = "finish",
+enum ResponseType {
+  ATACK = 'attack',
+  REG = 'reg',
+  UPDATE_ROOM = 'update_room',
+  UPDATE_WINNERS = 'update_winners',
+  CREATE_GAME = 'create_game',
+  START_GAME = 'start_game',
+  TURN = 'turn',
+  FINISH = 'finish',
 }
 
 type AtackResult = {
-  position: Position,
-  status: AtackResultStatus
-}
+  position: Position;
+  status: AtackResultStatus;
+};
 
 export {
   PlayerField,
@@ -66,5 +66,5 @@ export {
   AtackResult,
   SocketInfo,
   RequestType,
-  ResponseType
-}
+  ResponseType,
+};

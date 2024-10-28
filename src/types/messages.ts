@@ -1,116 +1,129 @@
 type Player = {
-  id: string,
-  name: string,
-  password: string,
-  sessionId?: string
-}
+  id: string;
+  name: string;
+  password: string;
+  sessionId?: string;
+};
 
 type Message = {
-  id: number,
-  type: string,
-  data:  BattleshipRequests | BattleshipResponces
-}
+  id: number;
+  type: string;
+  data: BattleshipRequests | BattleshipResponces;
+};
 
 type RegReq = {
-  name: string,
-  password: string,
-} 
+  name: string;
+  password: string;
+};
 
 type RegRes = {
-  name: string,
-  index: number | string,
-  error: boolean,
-  errorText: string,
-}
+  name: string;
+  index: number | string;
+  error: boolean;
+  errorText: string;
+};
 
 type Winner = {
-  name: string,
-  wins: number,
-}
+  name: string;
+  wins: number;
+};
 type UpdateWinnersRes = Winner[];
 
-type CreateNewRoomReq = "";
+type CreateNewRoomReq = '';
 
 type AddUserToRoomReq = {
-  indexRoom: number | string,
-}
+  indexRoom: number | string;
+};
 
 type AddUserToRoomRes = {
-  idGame: number | string,  
-  idPlayer: number | string,
-}
+  idGame: number | string;
+  idPlayer: number | string;
+};
 
 type RoomUser = {
-    name: string,
-    index: number | string,
-}
+  name: string;
+  index: number | string;
+};
 
 type Room = {
-  roomId: number | string,
-  roomUsers:RoomUser[],
-}
+  roomId: number | string;
+  roomUsers: RoomUser[];
+};
 
 type UpdateRoomStateRes = Room[];
 
 type Ship = {
   position: {
-      x: number,
-      y: number,
-  },
-  direction: boolean,
-  length: number,
-  type: "small"|"medium"|"large"|"huge",
-}
+    x: number;
+    y: number;
+  };
+  direction: boolean;
+  length: number;
+  type: 'small' | 'medium' | 'large' | 'huge';
+};
 
-type AddShipReq =  {
-  gameId: number | string,
-  ships:Ship[],
-  indexPlayer: number | string, /* id of the player in the current game session */
-}
+type AddShipReq = {
+  gameId: number | string;
+  ships: Ship[];
+  indexPlayer: number | string /* id of the player in the current game session */;
+};
 
 type StartGameRes = {
-  ships:Ship[],
-  currentPlayerIndex: number | string, /* id of the player in the current game session, who have sent his ships */
-}
+  ships: Ship[];
+  currentPlayerIndex:
+    | number
+    | string /* id of the player in the current game session, who have sent his ships */;
+};
 
 type Position = {
-  x: number,
-  y: number,
-}
+  x: number;
+  y: number;
+};
 
-type AttackReq =  {
-  gameId: number | string,
-  indexPlayer: number | string, /* id of the player in the current game session */
-} & Position
+type AttackReq = {
+  gameId: number | string;
+  indexPlayer: number | string /* id of the player in the current game session */;
+} & Position;
 
-type AttackRes =  {
-  position: Position,
-  currentPlayer: number | string, /* id of the player in the current game session */
-  status: "miss"|"killed"|"shot",
-}
+type AttackRes = {
+  position: Position;
+  currentPlayer: number | string /* id of the player in the current game session */;
+  status: 'miss' | 'killed' | 'shot';
+};
 
-type RandomAttackReq =  {
-  gameId: number | string,
-  indexPlayer: number | string, /* id of the player in the current game session */
-}
+type RandomAttackReq = {
+  gameId: number | string;
+  indexPlayer: number | string /* id of the player in the current game session */;
+};
 
 type PlayerTurnRes = {
-  currentPlayer: number | string; /* id of the player in the current game session */
-}
+  currentPlayer: number | string /* id of the player in the current game session */;
+};
 
 type FinishGameRes = {
-  
-  winPlayer: number | string /* id of the player in the current game session */
-}
+  winPlayer: number | string /* id of the player in the current game session */;
+};
 
+type BattleshipRequests =
+  | RegReq
+  | CreateNewRoomReq
+  | AddUserToRoomReq
+  | AddShipReq
+  | AttackReq
+  | RandomAttackReq;
 
-type BattleshipRequests = RegReq | CreateNewRoomReq | AddUserToRoomReq | AddShipReq | AttackReq | RandomAttackReq
-
-type BattleshipResponces = RegRes | UpdateWinnersRes | UpdateRoomStateRes | StartGameRes | AttackRes | PlayerTurnRes | FinishGameRes;
+type BattleshipResponces =
+  | RegRes
+  | UpdateWinnersRes
+  | UpdateRoomStateRes
+  | StartGameRes
+  | AttackRes
+  | PlayerTurnRes
+  | FinishGameRes;
 
 export {
   Player,
-  Message, 
+  Message,
   RegReq,
   Winner,
   RegRes,
@@ -130,4 +143,4 @@ export {
   RandomAttackReq,
   PlayerTurnRes,
   FinishGameRes,
-}
+};
