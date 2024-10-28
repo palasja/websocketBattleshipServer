@@ -1,12 +1,12 @@
 
 import { WebSocketServer } from 'ws';
-import { AddShipReq, AddUserToRoomReq,  AttackReq,   Message,   Position, RegReq, Room } from './types/messages';
+import { AddShipReq, AddUserToRoomReq,  AttackReq,   Message,   Position, RandomAttackReq, RegReq, Room } from './types/messages';
 import  { randomInt, randomUUID,  } from "node:crypto";
 import { GameInfo, PlayerGameInfo, SocketInfo } from './types/webServerTypes';
 import { sockets, availableRooms, winners, games, players } from './db';
 import { sendToRoomPlayer, sendMessageStr } from './senders';
 import { getPlayerCellField } from './cellGetter';
-import { atack } from './gameAction';
+import { atack, randomAtack } from './gameAction';
 import { newPlayer, createRoom, getGamePlayers } from './romActioon';
 import { removeRoomByPlayerId, removePlayer, removeSocketInfo, removeRoom } from './helper';
 
@@ -38,10 +38,13 @@ const startWebSocketServer = (runPort: number) => {
           sendMessageStr('update_winners', winners);
           break;
         };
-        // case 'randomAttack': {
-        //   sendMessageStr('update_room', availableRooms);
-        //   break;
-        // };
+        case 'randomAttack': {
+          const randomAtackRequest: RandomAttackReq = JSON.parse(messageReq.data as string);
+          const curGame = games.find(g => g.idGame == randomAtackRequest.gameId);
+          if(randomAtackRequest.indexPlayer != curGame?.actvePlayerSessionId) break;
+          randomAtack(curGame);
+          break;
+        };
         case 'create_room': {
           createRoom(playerId);
           sendMessageStr('update_room',  availableRooms);
@@ -82,7 +85,6 @@ const startWebSocketServer = (runPort: number) => {
           if(indexPlayer != curGame.actvePlayerSessionId) break;
           const atackedPosition:Position = {x, y }
           atack(curGame, atackedPosition);
-          sendToRoomPlayer(curGame, "turn");
           break;
         };
       }

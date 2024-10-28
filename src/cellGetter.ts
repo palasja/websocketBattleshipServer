@@ -5,7 +5,7 @@ const getPlayerCellField = (ships: Ship[]):PlayerField => {
   const field:PlayerField = Array(10).fill(0).map(() => Array(10).fill(undefined))
   ships.forEach( s => {
     const gameShip:CellInfo = {
-      cell: new Array(s.length).fill(true),
+      shipCellCounter: new Array(s.length).fill(true),
       ship: s,
     };
 
@@ -26,6 +26,7 @@ const getCellKilled = (ship: Ship):Position[] => {
     const pos: Position = ship.direction ? {x: ship.position.x, y:ship.position.y + i} : {x: ship.position.x + i, y:ship.position.y};    
     cell.push(pos);
   }
+  
   return cell;
 }
 

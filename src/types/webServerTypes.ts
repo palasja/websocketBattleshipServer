@@ -5,7 +5,7 @@ type SocketInfo = {
   playerId: string, 
   ws:WebSocket
 };
-type PlayerField = CellInfo[][]
+type PlayerField = CellInfo[][] | null[][] 
 type PlayerGameInfo = {
     name: string,
     sessionId: string,
@@ -15,7 +15,7 @@ type PlayerGameInfo = {
     countBrokenShip: number
 }
 type CellInfo = {
-  cell: boolean[],
+  shipCellCounter: boolean[],
   ship: Ship
 }
 
